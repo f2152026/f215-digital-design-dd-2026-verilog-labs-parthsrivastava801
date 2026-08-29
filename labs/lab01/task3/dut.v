@@ -17,37 +17,52 @@ module dut(
   //rca U_IMPL (.a(a), .b(b), .cin(cin), .sum(sum), .cout(cout));
 
   // ---- Option 2: gate-level carry-lookahead adder ----
-  cla4 U_IMPL (.a(a), .b(b), .cin(cin), .sum(sum), .cout(cout));
+  //cla4 U_IMPL (.a(a), .b(b), .cin(cin), .sum(sum), .cout(cout));
 
   // ---- Option 3: dataflow carry-lookahead adder ----
-  // cla4_dataflow U_IMPL (.a(a), .b(b), .cin(cin), .sum(sum), .cout(cout));
+  cla4_dataflow U_IMPL (.a(a), .b(b), .cin(cin), .sum(sum), .cout(cout));
 
 endmodule
 
-// (b) Gate-level CLA reflection
-// ------------------------------------------------------------
+// (c) cla4.v vs cla4_dataflow.v:
+//
+// cla4.v uses explicit AND/OR gate primitives and intermediate wires,
+// so it is longer and more verbose.
+//
+// cla4_dataflow.v uses assign statements, so each statement maps
+// more directly to the Boolean equation being implemented.
+//
+// Example:
+//
+// assign #(2) c2 = g[1]
+//                | (p[1] & g[0])
+//                | (p[1] & p[0] & cin);
+//
+// is much easier to read than the equivalent collection of AND and
+// OR gate instances.
+//
+// I would prefer cla4_dataflow.v for maintenance and debugging six
+// months from now because it is shorter, clearer, and closer to the
+// Boolean equations.
 
-// Would this hand-instantiated, gate-by-gate approach still be
-// reasonable for a 64-bit CLA?
+
+// (All three) Timing comparison:
 //
-// No. It would become very large and difficult to write,
-// verify, maintain, and debug by hand.
+// Based on the same testbench and the measured final transitions:
 //
-// A 64-bit CLA has much more complicated direct carry equations,
-// because the final carry would contain increasingly long
-// propagate terms.
+// RCA            -> slowest
+// Gate-level CLA -> faster
+// Dataflow CLA   -> fastest
 //
-// In a single fully expanded 64-bit CLA, the term feeding the
-// final carry corresponding to the input carry would be:
+// The RCA has a ripple carry path through multiple full adders.
+// The CLA computes carries directly from the P/G equations, so the
+// carry does not have to ripple through all four full adders.
 //
-// p63 & p62 & p61 & ... & p1 & p0 & cin
+// In these simulations, the dataflow CLA settles slightly earlier
+// than the gate-level CLA because the Boolean equations are expressed
+// directly in delayed assign statements.
 //
-// That term contains:
-//
-// 64 literals
-//
-// i.e. 63 propagate signals plus cin.
-//
-// Therefore, a fully expanded 64-bit CLA is impractical to
-// hand-instantiate gate-by-gate. In practice, hierarchical or
-// block-based CLA structures are used instead.
+// Exact waveform transitions depend on the simulator's handling of
+// the individual gate/continuous-assignment delays, so the final
+// stable value—not temporary intermediate values—is what should be
+// used when comparing settling time.
