@@ -32,10 +32,9 @@ module cla4(
 
   wire p0, p1, p2, p3;
   wire g0, g1, g2, g3;
-
   wire c1, c2, c3, c4;
 
-
+  // Step 1: generate/propagate signals
   xor #(2) P0 (p0, a[0], b[0]);
   xor #(2) P1 (p1, a[1], b[1]);
   xor #(2) P2 (p2, a[2], b[2]);
@@ -46,30 +45,29 @@ module cla4(
   and #(2) G2 (g2, a[2], b[2]);
   and #(2) G3 (g3, a[3], b[3]);
 
+  // Step 2: direct carry equations
 
+  // c1 = g0 + p0*cin
   wire c1_t0;
-
   and #(2) C1_AND (c1_t0, p0, cin);
   or  #(2) C1_OR  (c1, g0, c1_t0);
 
-
+  // c2 = g1 + p1*g0 + p1*p0*cin
   wire c2_t0, c2_t1;
-
   and #(2) C2_AND0 (c2_t0, p1, g0);
   and #(2) C2_AND1 (c2_t1, p1, p0, cin);
   or  #(2) C2_OR   (c2, g1, c2_t0, c2_t1);
 
-
+  // c3 = g2 + p2*g1 + p2*p1*g0 + p2*p1*p0*cin
   wire c3_t0, c3_t1, c3_t2;
-
   and #(2) C3_AND0 (c3_t0, p2, g1);
   and #(2) C3_AND1 (c3_t1, p2, p1, g0);
   and #(2) C3_AND2 (c3_t2, p2, p1, p0, cin);
   or  #(2) C3_OR   (c3, g2, c3_t0, c3_t1, c3_t2);
 
-
+  // c4 = g3 + p3*g2 + p3*p2*g1
+  //      + p3*p2*p1*g0 + p3*p2*p1*p0*cin
   wire c4_t0, c4_t1, c4_t2, c4_t3;
-
   and #(2) C4_AND0 (c4_t0, p3, g2);
   and #(2) C4_AND1 (c4_t1, p3, p2, g1);
   and #(2) C4_AND2 (c4_t2, p3, p2, p1, g0);
@@ -84,12 +82,13 @@ module cla4(
     c4_t3
   );
 
-  assign cout = c4;
+  assign #(2) cout = c4;
 
-
+  // Step 3: sum bits
   xor #(2) SUM0 (sum[0], p0, cin);
   xor #(2) SUM1 (sum[1], p1, c1);
   xor #(2) SUM2 (sum[2], p2, c2);
   xor #(2) SUM3 (sum[3], p3, c3);
 
 endmodule
+

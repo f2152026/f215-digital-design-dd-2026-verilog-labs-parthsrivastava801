@@ -27,11 +27,11 @@ module cla4_dataflow(
   wire [3:0] p, g;
   wire c1, c2, c3;
 
-  
+  // Generate and propagate signals
   assign #(2) p = a ^ b;
   assign #(2) g = a & b;
 
-
+  // Carry equations
   assign #(2) c1 =
       g[0]
     | (p[0] & cin);
@@ -54,7 +54,8 @@ module cla4_dataflow(
     | (p[3] & p[2] & p[1] & g[0])
     | (p[3] & p[2] & p[1] & p[0] & cin);
 
-
+  // Sum
   assign #(2) sum = p ^ {c3, c2, c1, cin};
 
 endmodule
+
