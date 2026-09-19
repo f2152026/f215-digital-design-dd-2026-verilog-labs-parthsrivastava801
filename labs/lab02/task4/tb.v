@@ -1,10 +1,5 @@
 // tb.v
-// Given -- do not modify.
-//
-// Instantiates all three of your AND-gate implementations side by side and
-// drives them with the SAME fast-toggling stimulus, so you can compare all
-// three waveforms in one view and see directly which implementation(s)
-// respond correctly to inputs that change faster than the delay.
+
 
 module tb;
 
@@ -41,6 +36,5 @@ module tb;
 
   initial
     $monitor($time, " a=%b b=%b | df=%b  before=%b  intra=%b",
-             t_a, t_b, y_df, y_before, y_intra);
-
+            t_a, t_b, y_df, y_before, y_intra);
 endmodule
