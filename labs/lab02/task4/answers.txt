@@ -1,0 +1,89 @@
+answers.txt
+
+Task 4 observations
+====================
+
+(a) Delay = 1
+----------------
+and_df:         Correct
+and_beh_before: Correct
+and_beh_intra:  Correct
+
+The inputs change every 2 time units, so no input change occurs while either
+behavioral process is waiting for its 1-unit delay.
+
+(b) Delay = 2
+----------------
+and_df:         Correct delayed-dataflow behavior
+and_beh_before: Incorrect for the intended delayed AND behavior
+and_beh_intra:  Incorrect for the intended delayed AND behavior
+
+The input changes occur exactly as frequently as the delay. The continuous
+assignment keeps responding to every input change. The behavioral processes,
+however, are blocked by their procedural delays and therefore can miss input
+changes.
+
+For and_beh_before, the inputs are evaluated AFTER the delay, so it may use
+the newer values that exist when the delay expires.
+
+For and_beh_intra, the AND expression is evaluated BEFORE the delay, so the
+value being written is captured from an earlier input state. Input changes
+that occur while the process is waiting are not separately handled.
+
+(c) Delay = 3
+----------------
+and_df:         Correct delayed-dataflow behavior
+and_beh_before: Incorrect
+and_beh_intra:  Incorrect
+
+Now the inputs change several times while the behavioral process is blocked.
+The before-assignment version evaluates whatever the inputs are when the
+delay finishes. The intra-assignment version has already captured an older
+value. Neither behaves like a continuously delayed version of the AND gate.
+
+The dataflow assignment continues to react to input changes and models the
+delayed combinational connection directly.
+
+(d) Overall observations
+------------------------
+For a delay of 1, all three implementations appear equivalent because the
+inputs do not change faster than the behavioral process can react.
+
+As the delay becomes equal to or greater than the input-change interval,
+the behavioral versions stop being equivalent to the dataflow version.
+
+The important distinction is:
+
+    #D y = a & b;
+
+waits first and evaluates a & b later.
+
+    y = #D a & b;
+
+evaluates a & b immediately and delays only the assignment.
+
+    assign #D y = a & b;
+
+is a continuous dataflow assignment with its own delay semantics and keeps
+responding to changes in its inputs.
+
+(e) What this teaches about simulation delays
+---------------------------------------------
+A simulation delay is not simply "make this operation take D time."
+
+Where the delay is placed determines when the input expression is evaluated
+and what happens when the inputs change while the process is delayed.
+
+For combinational logic with propagation delay, a delayed continuous
+assignment is often the most direct model:
+
+    assign #D y = expression;
+
+A procedural delay can introduce behavior that depends on the simulator's
+event scheduling and on whether the procedural process is blocked while
+inputs continue changing.
+
+Therefore, when testing delayed logic, the stimulus should change at times
+that are comparable to or faster than the modeled delay. Otherwise, different
+delay placements can appear identical even though they have fundamentally
+different simulation behavior.

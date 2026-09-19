@@ -12,6 +12,8 @@
 //
 // Use named port connections (.a(...), .b(...), etc.), not positional.
 
+
+
 module ripple_adder(
   input  [3:0] a,
   input  [3:0] b,
@@ -22,6 +24,49 @@ module ripple_adder(
 
   wire c1, c2, c3;
 
-  // TODO: your four FA_Gate instances go here.
+  // Bit 0
+  FA_Gate FA0 (
+    .a(a[0]),
+    .b(b[0]),
+    .cin(cin),
+    .sum(sum[0]),
+    .cout(c1)
+  );
+
+  // Bit 1
+  FA_Gate FA1 (
+    .a(a[1]),
+    .b(b[1]),
+    .cin(c1),
+    .sum(sum[1]),
+    .cout(c2)
+  );
+
+  // Bit 2
+  FA_Gate FA2 (
+    .a(a[2]),
+    .b(b[2]),
+    .cin(c2),
+    .sum(sum[2]),
+    .cout(c3)
+  );
+
+  // Bit 3
+  FA_Gate FA3 (
+    .a(a[3]),
+    .b(b[3]),
+    .cin(c3),
+    .sum(sum[3]),
+    .cout(cout)
+  );
 
 endmodule
+
+// 1. The final results for all test cases are arithmetically correct.
+//    Temporary intermediate values occur because of the gate delays
+//    while signals are propagating through the circuit.
+//
+// 2. For the 7+1 test case (0111 + 0001), the carry propagates through
+//    the internal wires c1, c2, and c3 in sequence. Because delays are
+//    present, each carry changes slightly later than the previous one.
+//    This visible sequential carry propagation is the ripple-carry effect.

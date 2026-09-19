@@ -26,10 +26,19 @@ module FA_Gate(
 );
   wire ps, pc1, pc2;
 
-  xor (ps,  a,   b);
-  and (pc1, a,   b);
-  xor (sum, cin, ps);
-  and (pc2, cin, ps);
-  or  (cout, pc1, pc2);
+xor #(2,3) (ps, a, b);
+and #(2,3) (pc1, a, b);
+xor #(2,3) (sum, cin, ps);
+and #(2,3) (pc2, cin, ps);
+or  #(2,3) (cout, pc1, pc2);
 
 endmodule
+
+// 1. The final results for all test cases are arithmetically correct.
+//    Temporary intermediate values occur because of the gate delays
+//    while signals are propagating through the circuit.
+//
+// 2. For the 7+1 test case (0111 + 0001), the carry propagates through
+//    the internal wires c1, c2, and c3 in sequence. Because delays are
+//    present, each carry changes slightly later than the previous one.
+//    This visible sequential carry propagation is the ripple-carry effect.
